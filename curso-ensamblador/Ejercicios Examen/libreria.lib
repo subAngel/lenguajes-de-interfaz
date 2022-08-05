@@ -1,0 +1,118 @@
+;------------------------------------------------------
+CursorXY MACRO fila, columna
+; Posiciona el cursor en las coordenadas introducidas.
+;------------------------------------------------------
+    MOV AH, 02h         
+    MOV BH, 00h         
+    MOV DH, fila        
+    MOV DL, columna     
+    INT 10h
+ENDM 
+
+;------------------------------------------------------
+WriteString MACRO string
+; Escribe una cadena en la salida estándar.
+;------------------------------------------------------
+    MOV AH, 09h         
+    LEA DX, string      
+    INT 21h             
+ENDM
+
+;------------------------------------------------------
+ReadCharEcho MACRO
+; Lee un solo caracter de la entrada estándar, con eco.
+;------------------------------------------------------
+    MOV AH, 01h
+    INT 21h
+ENDM
+
+.code
+;------------------------------------------------------
+cls PROC
+; Limpia la pantalla (25 filas y 80 columnas)
+;-------------------------------------------------------
+    POPA                    
+    MOV     ax,0600h        
+    MOV     cx,0            
+    MOV     dx,184Fh        
+    MOV     bh,7            
+    INT     10h             
+    PUSHA                   
+    RET
+cls ENDP
+;------------------------------------------------------
+CursorHide PROC
+; Oculta el puntero del cursor
+;------------------------------------------------------
+    MOV AX, 02H                 
+    INT 33H                     
+    RET
+CursorHide ENDP
+
+;------------------------------------------------------
+CursorShow PROC
+; Muestra el puntero del cursor
+;------------------------------------------------------
+    MOV AX, 01H                 
+    INT 33H                     
+    RET
+CursorShow ENDP
+
+;------------------------------------------------------
+Delay PROC
+; Hace un delay de aprox. 4 segundos
+;------------------------------------------------------
+    MOV     CX, 1FH         
+    MOV     DX, 4240H       
+    MOV     AH, 86H         ; Int 15h/86h - BIOS - WAIT (AT,PS)
+    INT     15H             
+    RET
+delay ENDP
+;------------------------------------------------------
+;---Pinta fondo y letra--------------------------------
+PaintBF MACRO color
+	mov ah,06h
+	mov bH,color
+	mov cx,0000h
+ 	mov dx,184fh
+	int 10h
+           
+	MOV AH,02H   ;Para posicionar el cursor
+	MOV BH,00H   ;Coloco en la pagina 0
+        MOV DX,0000H 
+        INT 10H      ;ejecuto la interrupción
+ENDM 
+
+
+AJCOORDXY MACRO FILA,COLUMNA
+    MOV AX, CX     
+    MOV BL,8
+    DIV BL
+    MOV COLUMNA, AL
+
+    MOV AX, DX
+    MOV BL, 8
+    DIV BL
+    MOV FILA,AL
+ENDM 
+;-----------------------------------------------------
+
+paint MACRO color,numChars
+    MOV AH, 09h             
+    MOV BL, color           
+    MOV CX, numChars        
+    INT 10H                 
+
+ENDM
+
+WriteStringColor MACRO string, color, numChars
+; Escribe una variable de cadena en la salida estándar.
+;------------------------------------------------------
+    MOV AH, 09h             
+    MOV BL, color           
+    MOV CX, numChars        
+    INT 10H                 
+    MOV AH, 09h             
+    LEA DX, string          
+    INT 21h                 
+ENDM
